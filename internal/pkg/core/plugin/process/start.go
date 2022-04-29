@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os/exec"
 	"path/filepath"
 
 	"gopkg.in/yaml.v2"
@@ -19,6 +20,7 @@ import (
 	"github.com/elastic/elastic-agent/internal/pkg/core/app"
 	"github.com/elastic/elastic-agent/internal/pkg/core/process"
 	"github.com/elastic/elastic-agent/internal/pkg/core/state"
+	"github.com/elastic/elastic-agent/pkg/core/logger"
 	"github.com/elastic/elastic-agent/pkg/core/server"
 )
 
@@ -28,6 +30,24 @@ func (a *Application) Start(ctx context.Context, t app.Taggable, cfg map[string]
 	defer a.appLock.Unlock()
 
 	return a.start(ctx, t, cfg, false)
+}
+
+type stdoutWriter struct {
+	log *logger.Logger
+}
+
+func (l stdoutWriter) Write(p []byte) (n int, err error) {
+	l.log.Info(string(p)) // TODO(Anderson): do I need to use %q?
+	return len(p), nil
+}
+
+type stderrWriter struct {
+	log *logger.Logger
+}
+
+func (l stderrWriter) Write(p []byte) (n int, err error) {
+	l.log.Error(string(p)) // TODO(Anderson): do I need to use %q?
+	return len(p), nil
 }
 
 // Start starts the application without grabbing the lock.
@@ -132,7 +152,10 @@ func (a *Application) start(ctx context.Context, t app.Taggable, cfg map[string]
 		a.processConfig,
 		a.uid,
 		a.gid,
-		spec.Args)
+		spec.Args, func(c *exec.Cmd) {
+			c.Stdout = stdoutWriter{log: a.logger.With("stdout", a.name)}
+			c.Stderr = stderrWriter{log: a.logger.With("stderr", a.name)}
+		})
 	if err != nil {
 		return fmt.Errorf("%q failed to start %q: %w",
 			a.Name(), spec.BinaryPath, err)
