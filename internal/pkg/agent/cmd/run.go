@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime/debug"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -101,6 +102,15 @@ func run(override cfgOverrider) error {
 		return err
 	}
 
+	// Catch a panic, log it, then panic.
+	defer func() {
+		if r := recover(); r != nil {
+			logger.With("stack_trace", string(debug.Stack())).
+				Panicf("recovered from panic: %v", r)
+		}
+	}()
+
+	// panic("testing catch panic")
 	cfg, err = tryDelayEnroll(ctx, logger, cfg, override)
 	if err != nil {
 		err = errors.New(err, "failed to perform delayed enrollment")
@@ -341,6 +351,7 @@ func setupMetrics(
 	if err != nil {
 		return nil, errors.New(err, "could not start the HTTP server for the API")
 	}
+	panic("my test panic")
 	s.Start()
 
 	if cfg.Pprof != nil && cfg.Pprof.Enabled {
