@@ -425,7 +425,19 @@ func (b *BeatsMonitor) injectLogsInput(cfg map[string]interface{}, components []
 					"add_formatted_index": map[string]interface{}{
 						"index": "%{[data_stream.type]}-%{[data_stream.dataset]}-%{[data_stream.namespace]}",
 					},
-				}},
+				},
+				map[string]any{
+					"drop_fields": map[string]any{
+						"when": map[string]any{
+							"regexp": map[string]any{
+								"message": "Host info",
+							},
+						},
+						"fields":         []interface{}{"system_info.host.ip"},
+						"ignore_missing": false,
+					},
+				},
+			},
 		},
 	}
 
