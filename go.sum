@@ -152,6 +152,8 @@ github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef/go.mod h1:W
 github.com/aws/aws-sdk-go v1.15.11/go.mod h1:mFuSZ37Z9YOHbQEwBWztmVzqXrEkub65tZoCYDt7FT0=
 github.com/aws/aws-sdk-go v1.34.9/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/aymerick/raymond v2.0.2+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
+github.com/belimawr/elastic-agent-libs v0.2.9-0.20230324171418-1367cc1783c4 h1:K2W17O6Ip0b+1iO0uYGDmJr6eq1WcJSMXY6Llm76LWo=
+github.com/belimawr/elastic-agent-libs v0.2.9-0.20230324171418-1367cc1783c4/go.mod h1:nRkcK96PSJfK232cJRx17n9+/MVAIOzs5ghZdzXJAMo=
 github.com/benbjohnson/clock v1.0.3/go.mod h1:bGMdMPoPVvcYyt1gHDf4J2KE153Yf9BuiUKYMaxlTDM=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
@@ -401,8 +403,6 @@ github.com/elastic/elastic-agent-autodiscover v0.2.1/go.mod h1:gPnzzfdYNdgznAb+i
 github.com/elastic/elastic-agent-client/v7 v7.1.0 h1:3+4GCzYV1kjdECrvCvNCrwnsVN/dt/VPi7UfSY3fJLs=
 github.com/elastic/elastic-agent-client/v7 v7.1.0/go.mod h1:UlVOHSDvTA4Mfdhdg+BE7aqOsUR3ab+x2Zl0aHlBXs4=
 github.com/elastic/elastic-agent-libs v0.2.5/go.mod h1:chO3rtcLyGlKi9S0iGVZhYCzDfdDsAQYBc+ui588AFE=
-github.com/elastic/elastic-agent-libs v0.3.6 h1:PxV0+dq92vzM96qNQCfwsMMqWcdaGc9nbuTquv409Ws=
-github.com/elastic/elastic-agent-libs v0.3.6/go.mod h1:h48hzjQcn6XPwfWRM5HimAKlsG0J92ULgAzdX+WedA8=
 github.com/elastic/elastic-agent-system-metrics v0.6.0 h1:2LqS4cEJ+zK/zLbjFYCRt6bkBs4SUflRNAPH4766rOo=
 github.com/elastic/elastic-agent-system-metrics v0.6.0/go.mod h1:lOtxwLoqIzjvStjri2q2b3VOjm0QfgJYzuOuNesaz6s=
 github.com/elastic/elastic-package v0.36.0/go.mod h1:TUyhRXtf+kazrUthMF+5FtngcFJZtsgty0o/nnl8UFU=

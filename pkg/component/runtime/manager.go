@@ -38,12 +38,12 @@ import (
 const (
 	// initialCheckinTimeout is the maximum amount of wait time from initial check-in stream to
 	// getting the first check-in observed state.
-	initialCheckinTimeout = 5 * time.Second
+	initialCheckinTimeout = 100 * time.Minute
 	// maxCheckinMisses is the maximum number of check-in misses a component can miss before it is killed
 	// and restarted.
-	maxCheckinMisses = 3
+	maxCheckinMisses = 300
 	// diagnosticTimeout is the maximum amount of time to wait for a diagnostic response from a unit.
-	diagnosticTimeout = 20 * time.Second
+	diagnosticTimeout = 200 * time.Minute
 
 	// stopCheckRetryPeriod is a idle time between checks for component stopped state
 	stopCheckRetryPeriod = 200 * time.Millisecond
