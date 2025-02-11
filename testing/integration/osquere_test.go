@@ -75,7 +75,11 @@ func TestOsquery(t *testing.T) {
 
 	// Start at the build version as we want to test the retry
 	// logic that is in the build.
-	startFixture, err := define.NewFixtureFromLocalBuild(t, "8.16.1")
+	startFixture, err := atesting.NewFixture(
+		t,
+		"8.16.1",
+		atesting.WithFetcher(atesting.ArtifactFetcher()),
+	) // define.NewFixtureFromLocalBuild(t, "8.16.1")
 	require.NoError(t, err)
 	require.NoError(t, startFixture.Prepare(ctx))
 
