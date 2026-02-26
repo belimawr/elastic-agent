@@ -1,6 +1,7 @@
 // Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
 // or more contributor license agreements. Licensed under the Elastic License 2.0;
 // you may not use this file except in compliance with the Elastic License 2.0.
+// This file was contributed to by generative AI
 
 package translate
 
@@ -15,6 +16,7 @@ import (
 	koanfmaps "github.com/knadh/koanf/maps"
 
 	"github.com/elastic/elastic-agent-client/v7/pkg/client"
+	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
 	"github.com/elastic/elastic-agent/internal/pkg/agent/application/monitoring/monitoringhelpers"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -43,6 +45,7 @@ const (
 	outputOtelOverrideFieldName           = "otel"
 	outputOtelOverrideExporterFieldName   = "exporter"
 	outputOtelOverrideExtensionsFieldName = "extensions"
+	receiverLogInputRunAsFilestreamPath   = "features.log_input_run_as_filestream.enabled"
 )
 
 // BeatMonitoringConfigGetter is a function that returns the monitoring configuration for a beat receiver.
@@ -347,6 +350,11 @@ func getReceiversConfigForComponent(
 		receiverConfig[beatName] = map[string]any{
 			"inputs": inputs,
 		}
+
+		logAsFilestreamEnabled, featureFlagSet := getLogAsFilestream(comp.Features)
+		if featureFlagSet {
+			receiverConfig[receiverLogInputRunAsFilestreamPath] = logAsFilestreamEnabled
+		}
 	case "metricbeat":
 		receiverConfig[beatName] = map[string]any{
 			"modules": inputs,
@@ -387,6 +395,34 @@ func getReceiversConfigForComponent(
 	return map[string]any{
 		receiverId.String(): receiverConfig,
 	}, nil
+}
+
+func getLogAsFilestream(featureFlags *proto.Features) (bool, bool) {
+	if featureFlags == nil || featureFlags.Source == nil {
+		return false, false
+	}
+
+	if agentAny, ok := featureFlags.Source.AsMap()["agent"]; ok {
+		if agentMap, ok := agentAny.(map[string]any); ok {
+			if featuresAny, ok := agentMap["features"]; ok {
+				if featuresMap, ok := featuresAny.(map[string]any); ok {
+					if logAsFilestreamAny, ok := featuresMap["log_input_run_as_filestream"]; ok {
+						if logAsFilestreamMap, ok := logAsFilestreamAny.(map[string]any); ok {
+							if enabledAny, ok := logAsFilestreamMap["enabled"]; ok {
+								enabled, ok := enabledAny.(bool)
+								if !ok {
+									return false, false
+								}
+								return enabled, true
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return false, false
 }
 
 func GetDefaultProcessors(beatName string) []map[string]any {

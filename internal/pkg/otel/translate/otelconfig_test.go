@@ -1,6 +1,7 @@
 // Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
 // or more contributor license agreements. Licensed under the Elastic License 2.0;
 // you may not use this file except in compliance with the Elastic License 2.0.
+// This file was contributed to by generative AI
 
 package translate
 
@@ -15,8 +16,10 @@ import (
 
 	otelcomponent "go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/elastic-agent-client/v7/pkg/client"
+	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
@@ -926,6 +929,135 @@ func TestGetOtelConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetOtelConfigWhenLogInputRunAsFilestreamFlagChanges(t *testing.T) {
+	buildModel := func(enabled bool) *component.Model {
+		featureSource, err := structpb.NewStruct(map[string]any{
+			"agent": map[string]any{
+				"features": map[string]any{
+					"log_input_run_as_filestream": map[string]any{
+						"enabled": enabled,
+					},
+				},
+			},
+		})
+		require.NoError(t, err, "failed to build test feature flags source")
+
+		return &component.Model{
+			Components: []component.Component{
+				{
+					ID:         "filestream-default",
+					InputType:  "filestream",
+					OutputType: "elasticsearch",
+					OutputName: "default",
+					Features: &proto.Features{
+						Source: featureSource,
+					},
+					InputSpec: &component.InputRuntimeSpec{
+						BinaryName: "elastic-otel-collector",
+						Spec: component.InputSpec{
+							Command: &component.CommandSpec{
+								Args: []string{"filebeat"},
+							},
+						},
+					},
+					Units: []component.Unit{
+						{
+							ID:   "filestream-unit",
+							Type: client.UnitTypeInput,
+							Config: component.MustExpectedConfig(map[string]any{
+								"id":         "test",
+								"use_output": "default",
+								"streams": []any{
+									map[string]any{
+										"id": "test-1",
+										"data_stream": map[string]any{
+											"dataset": "generic-1",
+										},
+										"paths": []any{
+											"/var/log/*.log",
+										},
+									},
+								},
+							}),
+						},
+						{
+							ID:   "filestream-default",
+							Type: client.UnitTypeOutput,
+							Config: component.MustExpectedConfig(map[string]any{
+								"type":     "elasticsearch",
+								"hosts":    []any{"localhost:9200"},
+								"username": "elastic",
+								"password": "password",
+							}),
+						},
+					},
+				},
+			},
+		}
+	}
+
+	getBeatMonitoringConfig := func(_, _ string) map[string]any {
+		return map[string]any{
+			"http": map[string]any{
+				"enabled": true,
+				"host":    "localhost",
+			},
+		}
+	}
+
+	configTrue, err := GetOtelConfig(buildModel(true), &info.AgentInfo{}, getBeatMonitoringConfig, logp.NewNopLogger())
+	require.NoError(t, err, "failed to build OTel config with feature flag enabled")
+	require.NotNil(t, configTrue, "OTel config with feature flag enabled must not be nil")
+
+	configFalse, err := GetOtelConfig(buildModel(false), &info.AgentInfo{}, getBeatMonitoringConfig, logp.NewNopLogger())
+	require.NoError(t, err, "failed to build OTel config with feature flag disabled")
+	require.NotNil(t, configFalse, "OTel config with feature flag disabled must not be nil")
+
+	receiverFeatureFlag := func(c *confmap.Conf) bool {
+		configMap := c.ToStringMap()
+		receiversMap, ok := configMap["receivers"].(map[string]any)
+		require.True(t, ok, "OTel config must include a receivers map")
+
+		receiverMap, ok := receiversMap["filebeatreceiver/_agent-component/filestream-default"].(map[string]any)
+		require.True(t, ok, "OTel config must include the filebeatreceiver config")
+
+		featureFlag, ok := receiverMap[receiverLogInputRunAsFilestreamPath].(bool)
+		require.Truef(t, ok, "receiver config must include %s as a boolean value", receiverLogInputRunAsFilestreamPath)
+
+		return featureFlag
+	}
+
+	assert.NotEqual(t, configTrue.ToStringMap(), configFalse.ToStringMap(), "OTel config should change when log_input_run_as_filestream changes")
+	assert.True(t, receiverFeatureFlag(configTrue), "receiver feature flag should be true when the source flag is enabled")
+	assert.False(t, receiverFeatureFlag(configFalse), "receiver feature flag should be false when the source flag is disabled")
+}
+
+func TestGetLogInputRunAsFilestreamFeatureFlag(t *testing.T) {
+	source, err := structpb.NewStruct(map[string]any{
+		"agent": map[string]any{
+			"features": map[string]any{
+				"log_input_run_as_filestream": map[string]any{
+					"enabled": true,
+				},
+			},
+		},
+	})
+	require.NoError(t, err, "failed to build test source map")
+
+	enabled, set := getLogInputRunAsFilestreamFeatureFlag(&proto.Features{Source: source})
+	assert.True(t, set, "feature flag should be marked as set")
+	assert.True(t, enabled, "feature flag should be true")
+
+	invalidSource, err := structpb.NewStruct(map[string]any{
+		"agent": "invalid-agent-shape",
+	})
+	require.NoError(t, err, "failed to build invalid source map")
+
+	enabled, set = getLogInputRunAsFilestreamFeatureFlag(&proto.Features{Source: invalidSource})
+	assert.False(t, set, "feature flag should not be set when source shape is invalid")
+	assert.False(t, enabled, "feature flag should default to false when source shape is invalid")
 }
 
 type filestreamConfigOption interface {

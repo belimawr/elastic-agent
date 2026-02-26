@@ -71,6 +71,9 @@ type cfg struct {
 			EncryptedConfig *struct {
 				Enabled bool `json:"enabled" yaml:"enabled" config:"enabled"`
 			} `json:"encrypted_config" yaml:"encrypted_config" config:"encrypted_config"`
+			LogRunAsFilestream *struct {
+				Enabled bool `json:"enabled" yaml:"enabled" config:"enabled"`
+			} `json:"log_input_run_as_filestream" yaml:"log_input_run_as_filestream" config:"log_input_run_as_filestream"`
 		} `json:"features" yaml:"features" config:"features"`
 	} `json:"agent" yaml:"agent" config:"agent"`
 }
