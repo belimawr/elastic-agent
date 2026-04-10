@@ -68,6 +68,10 @@ func TestFilebeatReceiverLogAsFilestream(t *testing.T) {
 			require.NoError(c, err)
 
 			got := docs.Hits.Total.Value
+			t.Logf("============================== [%s] Got %d events from %s",
+				time.Now().Format(time.RFC3339Nano),
+				got,
+				info.Namespace)
 			require.Equalf(
 				c,
 				want,
@@ -101,6 +105,7 @@ func TestFilebeatReceiverLogAsFilestream(t *testing.T) {
 		"LogFolder":    agentLogFilePath,
 	}
 
+	t.Logf("============================== Namespace/Index: %s", info.Namespace)
 	fixture, err := define.NewFixtureFromLocalBuild(
 		t,
 		define.Version())
@@ -142,6 +147,10 @@ func TestFilebeatReceiverLogAsFilestream(t *testing.T) {
 	waitEventsInES(50)
 
 	// Stop Elastic Agent
+	t.Logf("============================== [%s] Calling fixture.Stop",
+		time.Now().Format(time.RFC3339Nano),
+	)
+
 	fixture.Stop()
 	wg.Wait()
 
