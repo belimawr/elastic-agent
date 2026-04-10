@@ -36,7 +36,9 @@ func newOtelCommandWithArgs(_ []string, _ *cli.IOStreams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to start %s: %w", executable, err)
 			}
+			fmt.Println(`{"msg":"============================== WAITING CHILD PROCESS"}`)
 			err = cmd.Wait()
+			fmt.Println(`{"msg":"============================== CHILD PROCESS DONE"}`)
 			if err == nil {
 				return nil
 			}
