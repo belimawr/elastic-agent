@@ -709,23 +709,27 @@ func (f *Fixture) executeWithClient(ctx context.Context, command string, disable
 			killProc()
 			return ctx.Err()
 		case ps := <-procWaitCh:
+			f.t.Logf("==================== Process finished successfully with code: %d", ps.ExitCode())
 			if f.stopping {
 				return nil
 			}
 			return fmt.Errorf("elastic-agent exited unexpectedly with exit code: %d", ps.ExitCode())
 		case err := <-stdOut.Watch():
+			f.t.Logf("==================== stdOut.Watch error: %v", err)
 			if !f.allowErrs {
 				// no errors allowed
 				killProc()
 				return fmt.Errorf("elastic-agent logged an unexpected error: %w", err)
 			}
 		case err := <-stdErr.Watch():
+			f.t.Logf("==================== stdErr.Watch error: %v", err)
 			if !f.allowErrs {
 				// no errors allowed
 				killProc()
 				return fmt.Errorf("elastic-agent logged an unexpected error: %w", err)
 			}
 		case err := <-stateErrCh:
+			f.t.Logf("==================== stateErrCh error: %v", err)
 			if !f.stopping {
 				// Give the log watchers a second to write out the agent logs.
 				// Client connnection failures can happen quickly enough to prevent logging.
@@ -735,6 +739,7 @@ func (f *Fixture) executeWithClient(ctx context.Context, command string, disable
 				return fmt.Errorf("elastic-agent client received unexpected error: %w", err)
 			}
 		case <-doneChan:
+			f.t.Log("==================== doneChan ")
 			if !f.stopping {
 				// trigger the stop
 				f.stopping = true
