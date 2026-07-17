@@ -826,3 +826,5 @@ replace (
 	github.com/meraki/dashboard-api-go/v3 => github.com/tommyers-elastic/dashboard-api-go/v3 v3.0.0-20250616163611-a325b49669a4
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver => github.com/elastic/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.0.0-20260623161606-914313578a72
 )
+
+replace github.com/elastic/elastic-agent-autodiscover => github.com/belimawr/elastic-agent-autodiscover v0.2.2-0.20260717134819-45a9c7d8fca1

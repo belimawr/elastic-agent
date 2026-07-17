@@ -492,3 +492,5 @@ tool (
 	golang.org/x/tools/cmd/stringer
 	gotest.tools/gotestsum
 )
+
+replace github.com/elastic/elastic-agent-autodiscover => github.com/belimawr/elastic-agent-autodiscover v0.2.2-0.20260717134819-45a9c7d8fca1
