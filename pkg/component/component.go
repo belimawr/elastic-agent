@@ -218,6 +218,7 @@ func DefaultRuntimeConfig() *RuntimeConfig {
 			InputType: make(map[string]string),
 		},
 		Heartbeat: BeatRuntimeConfig{
+			Default: string(OtelRuntimeManager),
 			// go-ucfg sets this while unpacking, having it in the default makes testing easier
 			InputType: make(map[string]string),
 		},
