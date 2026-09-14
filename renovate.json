@@ -12,10 +12,7 @@
     "pre-commit"
   ],
   "baseBranchPatterns": [
-    "main",
-    "9.5",
-    "9.4",
-    "8.19"
+    "main"
   ],
   "labels": [
     "automation",
